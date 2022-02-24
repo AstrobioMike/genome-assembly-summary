@@ -1,0 +1,23 @@
+glds_ID:
+    "GLDS-XXX"
+
+is_euk:
+    False
+
+genomes_dir:
+    "../genomes"
+
+threads:
+    20
+
+pplacer_threads:
+    8
+
+eukcc_db_path:
+    "/global/data/Data_Processing/Genome_Datasets/Reference_DBs/eukccdb/eukcc2_db_ver_1.1"
+
+CAT_DB:
+    "/global/data/Data_Processing/Metagenomics_Datasets/Reference_DBs/CAT_prepare_20210107/2021-01-07_CAT_database"
+    
+CAT_TAX:
+    "/global/data/Data_Processing/Metagenomics_Datasets/Reference_DBs/CAT_prepare_20210107/2021-01-07_taxonomy"
