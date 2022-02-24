@@ -29,7 +29,7 @@ pplacer_threads:
 ### gtdb-tk ###
 # should change
 GTDB_DATA_PATH:
-    "/global/data/Data_Processing/Metagenomics_Datasets/Reference_DBs/GTDB-tk-ref-db"
+    "/path/to/GTDB-tk-ref-db"
 
 # likely shouldn't change
 GTDB_TRIGGER_FILE:
@@ -39,7 +39,7 @@ GTDB_TRIGGER_FILE:
 ### CAT ###
 # should change
 DIR_HOLDING_CAT_DIR:
-    "/global/data/Data_Processing/Metagenomics_Datasets/Reference_DBs"
+    "/path/to/dir/holding/CAT-db"
 
 # likely shouldn't change
 CAT_DIR:
@@ -61,7 +61,7 @@ CAT_TRIGGER_FILE:
 ### eukcc ###
 # should change
 DIR_HOLDING_eukcc_DIR:
-    "/global/data/Data_Processing/Genome_Datasets/Reference_DBs/eukccdb"
+    "/path/to/dir/holding/eukcc-db"
 
 # likely shouldn't change
 eukcc_db_dir:
