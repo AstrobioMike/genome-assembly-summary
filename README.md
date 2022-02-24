@@ -1,5 +1,5 @@
 # Genome assembly summary
-Snakemake workflow for generating and combining genome assembly stats and taxonomy info.
+Snakemake workflow for generating and combining genome assembly stats and taxonomy info. Inputs are fasta files of genome assemblies (currently only non-compressed).
 
 It uses:
 
