@@ -1,18 +1,29 @@
 output_prefix:
     "GLDS-XXX"
 
+# set to True, with no quotes, if genomes are from eukarya, False, with no quotes if bacteria/archaea
 is_euk:
     False
 
 genomes_dir:
     "../genomes"
 
+# extension the fasta files have (must not be gzipped; include the period preceding, e.g., ".fasta", ".fna", ".fa")
+assembly_extension:
+    ".fasta"
+
+## number of threads or cpus (depending on how the program labeled them) to use per snakemake job (set with the -j parameter to the snakemake call)
+    # passed to eukcc, CAT, checkm, gtdb-tk
 threads:
     20
 
-pplacer_threads:
-    8
+## number of cpus or threads (depending on how the program labeled them) passed to pplacer by gtdb-tk and checkm
+# pplacer can have issues with memory with multiple cpus; see e.g. https://ecogenomics.github.io/GTDBTk/faq.html#gtdb-tk-reaches-the-memory-limit-pplacer-crashes
+gtdb_tk_checkm_pplacer_cpus:
+    2
 
+logs_dir:
+    "logs/"
 
 #######################################################
 ################# REFERENCE DATABASES #################
