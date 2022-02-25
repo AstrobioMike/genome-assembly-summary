@@ -2,6 +2,11 @@ configfile: "config.yaml"
 
 genome_IDs, = glob_wildcards(config["genomes_dir"] + "/{id}" + config["assembly_extension"])
 
+# checking any were found
+if len(genome_IDs) == 0:
+    print("\n    No assembly fasta files were found, is the config.yaml file set appropriately?\n")
+    exit(1)
+
 # making directory for log files
 try:
     os.mkdir(config["logs_dir"])
@@ -12,7 +17,9 @@ rule all:
     input:
         str(config["output_prefix"]) + "-genome-summaries.tsv"
     shell:
-        "rm -rf checkm-output/ checkm-snake.log checkm-summary.tsv gtdb-snake.log gtdb-taxonomy.tsv gtdb-tk-out/ *-prots.faa *-CAT.log *-eukcc.log"
+        """
+        rm -rf checkm-output/ checkm-summary.tsv gtdb-taxonomy.tsv gtdb-tk-out/ *-prots.faa
+        """
 
 
 rule gen_summary_stats:
@@ -30,15 +37,16 @@ rule gen_summary_stats:
 
 ## processing if eukarya
 if config["is_euk"]:
+
     rule run_eukcc:
         conda:
             "envs/eukcc.yaml"
         input:
             genome = config["genomes_dir"] + "/{genome_ID}" + config["assembly_extension"],
-            eukcc_db_trigger = config["eukcc_db_path"] + "/" + config["eukcc_TRIGGER_FILE"]
+            eukcc_db_trigger = config["DIR_HOLDING_eukcc_DIR"] + "/" + config["eukcc_db_dir"] + "/" + config["eukcc_TRIGGER_FILE"]
         params:
             output_dir = "{genome_ID}-eukcc-out",
-            eukcc_db_dir = config["eukcc_db_path"]
+            eukcc_db_dir = config["DIR_HOLDING_eukcc_DIR"] + "/" + config["eukcc_db_dir"]
         resources:
             cpus = config["threads"]
         log:
@@ -79,12 +87,12 @@ if config["is_euk"]:
         input:
             genome = config["genomes_dir"] + "/{genome_ID}" + config["assembly_extension"],
             AA_seqs = "{genome_ID}-prots.faa",
-            cat_db_trigger = config["CAT_DIR"] + "/" + config["CAT_TRIGGER_FILE"]
+            cat_db_trigger = config["DIR_HOLDING_CAT_DIR"] + "/" + config["CAT_DIR"] + "/" + config["CAT_TRIGGER_FILE"]
         params:
             tmp_out_prefix = "{genome_ID}-tax-dir.tmp",
             tmp_tax = "{genome_ID}-tax.tmp",
-            cat_db = config["CAT_DB"],
-            cat_tax = config["CAT_TAX"],
+            cat_db = config["DIR_HOLDING_CAT_DIR"] + "/" + config["CAT_DIR"] + "/" + config["CAT_DB"],
+            cat_tax = config["DIR_HOLDING_CAT_DIR"] + "/" + config["CAT_DIR"] + "/" + config["CAT_TAX"],
             num_threads = config["threads"],
             assembly_extension = config["assembly_extension"]
         log:
