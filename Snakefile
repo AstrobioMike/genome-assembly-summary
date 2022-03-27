@@ -148,7 +148,8 @@ if not config["is_euk"]:
             "envs/checkm.yaml"
         params:
             pplacer_cpus = config["gtdb_tk_checkm_pplacer_cpus"],
-            genomes_dir = config["genomes_dir"]
+            genomes_dir = config["genomes_dir"],
+            extension = config["assembly_extension"]
         resources:
             cpus = config["threads"]
         output:
@@ -157,7 +158,7 @@ if not config["is_euk"]:
             config["logs_dir"] + "checkm.log"
         shell:
             """
-            checkm lineage_wf -x fasta -t {resources.cpus} --pplacer_threads {params.pplacer_cpus} --tab_table -f checkm-summary.tsv {params.genomes_dir} checkm-output > {log} 2>&1
+            checkm lineage_wf -x {params.extension} -t {resources.cpus} --pplacer_threads {params.pplacer_cpus} --tab_table -f checkm-summary.tsv {params.genomes_dir} checkm-output > {log} 2>&1
             """
 
 
@@ -168,7 +169,8 @@ if not config["is_euk"]:
             gtdbtk_db_trigger = config["GTDB_DATA_PATH"] + "/" + config["GTDB_TRIGGER_FILE"]
         params:
             pplacer_cpus = config["gtdb_tk_checkm_pplacer_cpus"],
-            genomes_dir = config["genomes_dir"]
+            genomes_dir = config["genomes_dir"],
+            extension = config["assembly_extension"]
         resources:
             cpus = config["threads"]
         output:
@@ -177,7 +179,7 @@ if not config["is_euk"]:
             config["logs_dir"] + "gtdb.log"
         shell:
             """
-            gtdbtk classify_wf -x fasta --genome_dir {params.genomes_dir} --out_dir {output} --cpus {resources.cpus} --pplacer_cpus {params.pplacer_cpus} > {log} 2>&1
+            gtdbtk classify_wf -x {params.extension} --genome_dir {params.genomes_dir} --out_dir {output} --cpus {resources.cpus} --pplacer_cpus {params.pplacer_cpus} > {log} 2>&1
             """
 
 

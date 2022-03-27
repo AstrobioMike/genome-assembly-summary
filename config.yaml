@@ -1,5 +1,5 @@
 output_prefix:
-    "GLDS-XXX"
+    "Output"
 
 # set to True, with no quotes, if genomes are from eukarya, False, with no quotes if bacteria/archaea
 is_euk:
