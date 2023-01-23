@@ -31,6 +31,11 @@ checkm2_output_dir:
 gtdbtk_output_dir:
     "gtdb-tk-output/"
 
+## keep all files?
+# set this to "YES" (all caps needed) if wanting to keep all produced files by all programs, anything else here
+# means all be deleted upon completion except for the primary output summary table
+keep_all_files:
+    "no"
 
 #######################################################
 ################# REFERENCE DATABASES #################
@@ -50,6 +55,9 @@ CHECKM2_DATA_PATH:
     "/checkm2-ref-dir/"
 
 # likely shouldn't change
+CHECKM2_DB_FILENAME:
+    "uniref100.KO.1.dmnd"
+
 CHECKM2_TRIGGER_FILE:
     "CHECKM2_DB_SETUP"
 
@@ -100,3 +108,13 @@ eukcc_DL_LINK:
     "http://ftp.ebi.ac.uk/pub/databases/metagenomics/eukcc/eukcc2_db_ver_1.1.tar.gz"
 eukcc_TRIGGER_FILE:
     "eukcc_DB_SETUP"
+
+## example usage command ##
+# snakemake --use-conda --conda-prefix ${CONDA_PREFIX}/envs -j 4 -p
+
+# `--use-conda` – this specifies to use the conda environments included in the workflow
+# `--conda-prefix` – this allows us to point to where the needed conda environments should be stored. Including this means if we use the workflow on a different dataset somewhere else in the future, it will re-use the same conda environments rather than make new ones. The value listed here, `${CONDA_PREFIX}/envs`, is the default location for conda environments (the variable `${CONDA_PREFIX}` will be expanded to the appropriate location on whichever system it is run on).
+# `-j` – this lets us set how many jobs Snakemake should run concurrently (keep in mind that many of the thread and cpu parameters set in the config.yaml file will be multiplied by this)
+# `-p` – specifies to print out each command being run to the screen
+
+# See `snakemake -h` for more options and details.

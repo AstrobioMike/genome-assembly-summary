@@ -15,17 +15,21 @@ except:
     pass
 
 
+
 rule all:
     input:
         str(config["output_prefix"]) + "-genome-summaries.tsv"
     params:
         checkm2_output = config["checkm2_output_dir"],
-        gtdbtk_output = config["gtdbtk_output_dir"]
+        gtdbtk_output = config["gtdbtk_output_dir"],
+        keep_all_files = config["keep_all_files"]
     shell:
         """
-        # commented out for now so as to not remove primary helper program outputs or intermediate files
-        # rm -rf {params} checkm2-results.tsv gtdb-taxonomy.tsv
-        # rm -rf checkm-output/ checkm-summary.tsv gtdb-taxonomy.tsv gtdb-tk-out/ *-prots.faa
+        if [ {params.keep_all_files} != "YES" ]; then
+
+            rm -rf {params.checkm2_output} {params.gtdbtk_output} checkm2-results.tsv gtdb-taxonomy.tsv summary-stats.tsv
+
+        fi
         """
 
 
@@ -157,11 +161,12 @@ if not config["is_euk"]:
         input:
             checkm2_db_trigger = config["CHECKM2_DATA_PATH"] + "/" + config["CHECKM2_TRIGGER_FILE"]
         params:
-            pplacer_cpus = config["gtdb_tk_checkm_pplacer_cpus"],
+            pplacer_cpus = config["gtdb_tk_pplacer_cpus"],
             genomes_dir = config["genomes_dir"],
             extension = config["assembly_extension"],
             output_dir = config["checkm2_output_dir"],
-            checkm2_db_dir = config["CHECKM2_DATA_PATH"]
+            checkm2_db_dir = config["CHECKM2_DATA_PATH"],
+            checkm2_db_filename = config["CHECKM2_DB_FILENAME"]
         resources:
             cpus = config["threads"]
         output:
@@ -172,12 +177,19 @@ if not config["is_euk"]:
         shell:
             """
             # setting db dir variable if not set in the environment for some reason
-            if [ -z "$CHECKM2DB" ]; then export CHECKM2DB={params.checkm2_db_dir}; fi
+                # snakemake uses bash strict mode, so need this so it won't fail if the variable isn't set
+            set +u
+            if [ -z "${{CHECKM2DB}}" ] || [ "${{CHECKM2DB}}" != "{params.checkm2_db_dir}/{params.checkm2_db_filename}" ]; then
 
-            checkm2 predict -i {params.genomes_dir} -x {params.extension} -t {resources.cpus} --output-directory {output.out_dir}
+                export CHECKM2DB={params.checkm2_db_dir}/{params.checkm2_db_filename}
+
+            fi
+            set -u
+
+            checkm2 predict -i {params.genomes_dir} -x {params.extension} -t {resources.cpus} --output-directory {output.out_dir} > {log} 2>&1
 
             # making copy of primary output file
-            cp {output.out_dir}/quality_report.tsv {output.checkm2_results_file}
+            cp {output.out_dir}/quality_report.tsv {output.checkm2_results_tab}
             """
 
 
@@ -200,7 +212,14 @@ if not config["is_euk"]:
         shell:
             """
             # setting db dir variable if not set in the environment for some reason
-            if [ -z "$GTDBTK_DATA_PATH" ]; then export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}; fi
+                # snakemake uses bash strict mode, so need this so it won't fail if the variable isn't set
+            set +u
+            if [ -z "${{GTDBTK_DATA_PATH}}" ] || [ "${{GTDBTK_DATA_PATH}}" != "{params.gtdbtk_db_dir}" ]; then
+
+                export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}
+
+            fi
+            set -u
 
             gtdbtk classify_wf -x {params.extension} --genome_dir {params.genomes_dir} --out_dir {output} --cpus {resources.cpus} --pplacer_cpus {params.pplacer_cpus} > {log} 2>&1
             """
@@ -226,9 +245,11 @@ if not config["is_euk"]:
             "python scripts/combine-outputs.py -s {input.assembly_stats_tab} -c {input.checkm2_results_tab} -t {input.gtdb_tax_tab} -o {output}"
 
 
-rule clean:
+rule clean_all:
     shell:
-        "rm -rf checkm-output checkm-snake.log checkm-summary.tsv gtdb-snake.log gtdb-taxonomy.tsv gtdb-tk-out summary-stats.tsv *-genome-summaries.tsv combined-eukcc-estimates.tsv CAT-taxonomies.tsv *-renamed-prots.faa *-CAT.log *-eukcc.log"
+        """
+        rm -rf checkm2-output/ logs/ checkm2-results.tsv gtdb-taxonomy.tsv gtdb-tk-output/ summary-stats.tsv *-genome-summaries.tsv
+        """
 
 
 ### database checking and setup rules if needed ###
@@ -244,29 +265,25 @@ rule setup_checkm2_db:
     output:
         checkm2_db_trigger = config["CHECKM2_DATA_PATH"] + "/" + config["CHECKM2_TRIGGER_FILE"]
     params:
-        checkm2_db_dir = config["CHECKM2_DATA_PATH"]
+        checkm2_db_dir = config["CHECKM2_DATA_PATH"],
+        checkm2_db_filename = config["CHECKM2_DB_FILENAME"]
     log:
         config["logs_dir"] + "setup-checkm2-db.log"
     shell:
         """
-        mkdir -p {params.checkm2_db_dir}
-
-        # storing current working directory to be able to send the log file here
-        working_dir=$(pwd)
-
-        cd {params.checkm2_db_dir}
-        
         # adding wanted location to this conda env PATH (checkm2 looks in the CHECKM2DB variable),
             # so will be set when the conda environment is started from now on
         mkdir -p ${{CONDA_PREFIX}}/etc/conda/activate.d/
-        echo 'export CHECKM2DB={params.checkm2_db_dir}' >> ${{CONDA_PREFIX}}/etc/conda/activate.d/set_env_vars.sh
-        # but still needs to be set for this particular session that is downloading and setting up the db
-        export CHECKM2DB={params.checkm2_db_dir}
+        echo 'export CHECKM2DB={params.checkm2_db_dir}/{params.checkm2_db_filename}' >> ${{CONDA_PREFIX}}/etc/conda/activate.d/set_env_vars.sh
         
-        # now downloading
-        checkm2 database --download > ${{working_dir}}/{log} 2>&1
-        cd - > /dev/null
-        # placing file so that the workflow knows in the future this is done
+        # downloading ref db (will move to where we want it next)
+        checkm2 database --download > {log} 2>&1
+
+        # moving from default download location to wanted location
+        mkdir -p {params.checkm2_db_dir}
+        mv /home/${{USER}}/databases/CheckM2_database/* {params.checkm2_db_dir}
+
+        # placing file so that the workflow knows in the future this is done already
         touch {output.checkm2_db_trigger}
         """
 
@@ -299,7 +316,7 @@ rule setup_gtdbtk_db:
         echo 'export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}' >> ${{CONDA_PREFIX}}/etc/conda/activate.d/set_env_vars.sh
         # but still needs to be set for this particular session that is downloading and setting up the db
         export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}
-        
+
         # now downloading
         download-db.sh > ${{working_dir}}/{log} 2>&1
         cd - > /dev/null
