@@ -47,7 +47,7 @@ checkm2_df = pd.read_csv(args.input_checkm2_tsv, sep = "\t", index_col = 0)
 
 # slimming down to those we want
 wanted_checkm_cols = ["Completeness", "Contamination"]
-checkm_df = checkm2_df.loc[:, wanted_checkm_cols]
+checkm2_df = checkm2_df.loc[:, wanted_checkm_cols]
 
 # renaming columns
 checkm2_df.columns = ["Est. Completeness (%)", "Est. Redundancy (%)"]
