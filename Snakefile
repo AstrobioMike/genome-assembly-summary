@@ -2,10 +2,11 @@ configfile: "config.yaml"
 
 genome_IDs, = glob_wildcards(config["genomes_dir"] + "/{id}" + config["assembly_extension"])
 
-# checking any were found
+# checking if any input fastas were found
 if len(genome_IDs) == 0:
     print("\n    No assembly fasta files were found, is the config.yaml file set appropriately?\n")
     exit(1)
+
 
 # making directory for log files
 try:
@@ -13,12 +14,18 @@ try:
 except:
     pass
 
+
 rule all:
     input:
         str(config["output_prefix"]) + "-genome-summaries.tsv"
+    params:
+        checkm2_output = config["checkm2_output_dir"],
+        gtdbtk_output = config["gtdbtk_output_dir"]
     shell:
         """
-        rm -rf checkm-output/ checkm-summary.tsv gtdb-taxonomy.tsv gtdb-tk-out/ *-prots.faa
+        # commented out for now so as to not remove primary helper program outputs or intermediate files
+        # rm -rf {params} checkm2-results.tsv gtdb-taxonomy.tsv
+        # rm -rf checkm-output/ checkm-summary.tsv gtdb-taxonomy.tsv gtdb-tk-out/ *-prots.faa
         """
 
 
@@ -143,22 +150,34 @@ if config["is_euk"]:
 
 # processing if not eukarya
 if not config["is_euk"]:
-    rule run_checkm:
+
+    rule run_checkm2:
         conda:
-            "envs/checkm.yaml"
+            "envs/checkm2.yaml"
+        input:
+            checkm2_db_trigger = config["CHECKM2_DATA_PATH"] + "/" + config["CHECKM2_TRIGGER_FILE"]
         params:
             pplacer_cpus = config["gtdb_tk_checkm_pplacer_cpus"],
             genomes_dir = config["genomes_dir"],
-            extension = config["assembly_extension"]
+            extension = config["assembly_extension"],
+            output_dir = config["checkm2_output_dir"],
+            checkm2_db_dir = config["CHECKM2_DATA_PATH"]
         resources:
             cpus = config["threads"]
         output:
-            "checkm-summary.tsv"
+            out_dir = directory(config["checkm2_output_dir"]),
+            checkm2_results_tab = "checkm2-results.tsv"
         log:
-            config["logs_dir"] + "checkm.log"
+            config["logs_dir"] + "checkm2.log"
         shell:
             """
-            checkm lineage_wf -x {params.extension} -t {resources.cpus} --pplacer_threads {params.pplacer_cpus} --tab_table -f checkm-summary.tsv {params.genomes_dir} checkm-output > {log} 2>&1
+            # setting db dir variable if not set in the environment for some reason
+            if [ -z "$CHECKM2DB" ]; then export CHECKM2DB={params.checkm2_db_dir}; fi
+
+            checkm2 predict -i {params.genomes_dir} -x {params.extension} -t {resources.cpus} --output-directory {output.out_dir}
+
+            # making copy of primary output file
+            cp {output.out_dir}/quality_report.tsv {output.checkm2_results_file}
             """
 
 
@@ -168,46 +187,89 @@ if not config["is_euk"]:
         input:
             gtdbtk_db_trigger = config["GTDB_DATA_PATH"] + "/" + config["GTDB_TRIGGER_FILE"]
         params:
-            pplacer_cpus = config["gtdb_tk_checkm_pplacer_cpus"],
+            pplacer_cpus = config["gtdb_tk_pplacer_cpus"],
             genomes_dir = config["genomes_dir"],
-            extension = config["assembly_extension"]
+            extension = config["assembly_extension"],
+            gtdbtk_db_dir = config["GTDB_DATA_PATH"]
         resources:
             cpus = config["threads"]
         output:
-            directory("gtdb-tk-out")
+            directory(config["gtdbtk_output_dir"])
         log:
             config["logs_dir"] + "gtdb.log"
         shell:
             """
+            # setting db dir variable if not set in the environment for some reason
+            if [ -z "$GTDBTK_DATA_PATH" ]; then export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}; fi
+
             gtdbtk classify_wf -x {params.extension} --genome_dir {params.genomes_dir} --out_dir {output} --cpus {resources.cpus} --pplacer_cpus {params.pplacer_cpus} > {log} 2>&1
             """
 
 
     rule combine_gtdb_classifications:
         input:
-            "gtdb-tk-out"
+            config["gtdbtk_output_dir"]
         output:
-            "gtdb-taxonomy.tsv"
+            gtdb_tax_tab = "gtdb-taxonomy.tsv"
         shell:
-            "cut -f 1,2 gtdb-tk-out/classify/*summary.tsv > {output}"
+            "cut -f 1,2 {input}/classify/*summary.tsv > {output}"
 
 
     rule combine_outputs:
         input:
             assembly_stats_tab = "summary-stats.tsv",
-            checkm_tab = "checkm-summary.tsv",
+            checkm2_results_tab = "checkm2-results.tsv",
             gtdb_tax_tab = "gtdb-taxonomy.tsv"
         output:
             str(config["output_prefix"]) + "-genome-summaries.tsv"
         shell:
-            "python scripts/combine-outputs.py -s {input.assembly_stats_tab} -c {input.checkm_tab} -t {input.gtdb_tax_tab} -o {output}"
+            "python scripts/combine-outputs.py -s {input.assembly_stats_tab} -c {input.checkm2_results_tab} -t {input.gtdb_tax_tab} -o {output}"
+
 
 rule clean:
     shell:
         "rm -rf checkm-output checkm-snake.log checkm-summary.tsv gtdb-snake.log gtdb-taxonomy.tsv gtdb-tk-out summary-stats.tsv *-genome-summaries.tsv combined-eukcc-estimates.tsv CAT-taxonomies.tsv *-renamed-prots.faa *-CAT.log *-eukcc.log"
 
 
-### database checking and setup rules ###
+### database checking and setup rules if needed ###
+
+rule setup_checkm2_db:
+    """
+    This rule checks for the checkm2 db and downloads if needed.
+    """
+
+    conda:
+        "envs/checkm2.yaml"
+
+    output:
+        checkm2_db_trigger = config["CHECKM2_DATA_PATH"] + "/" + config["CHECKM2_TRIGGER_FILE"]
+    params:
+        checkm2_db_dir = config["CHECKM2_DATA_PATH"]
+    log:
+        config["logs_dir"] + "setup-checkm2-db.log"
+    shell:
+        """
+        mkdir -p {params.checkm2_db_dir}
+
+        # storing current working directory to be able to send the log file here
+        working_dir=$(pwd)
+
+        cd {params.checkm2_db_dir}
+        
+        # adding wanted location to this conda env PATH (checkm2 looks in the CHECKM2DB variable),
+            # so will be set when the conda environment is started from now on
+        mkdir -p ${{CONDA_PREFIX}}/etc/conda/activate.d/
+        echo 'export CHECKM2DB={params.checkm2_db_dir}' >> ${{CONDA_PREFIX}}/etc/conda/activate.d/set_env_vars.sh
+        # but still needs to be set for this particular session that is downloading and setting up the db
+        export CHECKM2DB={params.checkm2_db_dir}
+        
+        # now downloading
+        checkm2 database --download > ${{working_dir}}/{log} 2>&1
+        cd - > /dev/null
+        # placing file so that the workflow knows in the future this is done
+        touch {output.checkm2_db_trigger}
+        """
+
 
 rule setup_gtdbtk_db:
     """
@@ -225,18 +287,23 @@ rule setup_gtdbtk_db:
     shell:
         """
         mkdir -p {params.gtdbtk_db_dir}
+
         # storing current working directory to be able to send the log file here
         working_dir=$(pwd)
+
         cd {params.gtdbtk_db_dir}
+
         # adding wanted location to this conda env PATH (gtdb-tk looks in the GTDBTK_DATA_PATH variable),
             # so will be set when the conda environment is started from now on
         mkdir -p ${{CONDA_PREFIX}}/etc/conda/activate.d/
         echo 'export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}' >> ${{CONDA_PREFIX}}/etc/conda/activate.d/set_env_vars.sh
         # but still needs to be set for this particular session that is downloading and setting up the db
-        GTDBTK_DATA_PATH={params.gtdbtk_db_dir}
+        export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}
+        
         # now downloading
         download-db.sh > ${{working_dir}}/{log} 2>&1
         cd - > /dev/null
+        # placing file so that the workflow knows in the future this is done
         touch {output.gtdbtk_db_trigger}
         """
 

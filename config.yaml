@@ -13,17 +13,24 @@ assembly_extension:
     ".fasta"
 
 ## number of threads or cpus (depending on how the program labeled them) to use per snakemake job (set with the -j parameter to the snakemake call)
-    # passed to eukcc, CAT, checkm, gtdb-tk
+    # passed to eukcc, CAT, checkm2, gtdb-tk
 threads:
     20
 
-## number of cpus or threads (depending on how the program labeled them) passed to pplacer by gtdb-tk and checkm
+## number of cpus used by pplacer by gtdb-tk
 # pplacer can have issues with memory with multiple cpus; see e.g. https://ecogenomics.github.io/GTDBTk/faq.html#gtdb-tk-reaches-the-memory-limit-pplacer-crashes
-gtdb_tk_checkm_pplacer_cpus:
-    2
+gtdb_tk_pplacer_cpus:
+    4
 
 logs_dir:
     "logs/"
+
+checkm2_output_dir:
+    "checkm2-output/"
+
+gtdbtk_output_dir:
+    "gtdb-tk-output/"
+
 
 #######################################################
 ################# REFERENCE DATABASES #################
@@ -37,10 +44,20 @@ logs_dir:
 
 # these should be full paths to the directories that will hold the databases
 
+### checkm2 ###
+# should change
+CHECKM2_DATA_PATH:
+    "/checkm2-ref-dir/"
+
+# likely shouldn't change
+CHECKM2_TRIGGER_FILE:
+    "CHECKM2_DB_SETUP"
+
+
 ### gtdb-tk ###
 # should change
 GTDB_DATA_PATH:
-    "/path/to/GTDB-tk-ref-db"
+    "/GTDB-tk-ref-dir/"
 
 # likely shouldn't change
 GTDB_TRIGGER_FILE:
@@ -50,7 +67,7 @@ GTDB_TRIGGER_FILE:
 ### CAT ###
 # should change
 DIR_HOLDING_CAT_DIR:
-    "/path/to/dir/holding/CAT-db"
+    "/CAT-ref-dir/"
 
 # likely shouldn't change
 CAT_DIR:
@@ -72,7 +89,7 @@ CAT_TRIGGER_FILE:
 ### eukcc ###
 # should change
 DIR_HOLDING_eukcc_DIR:
-    "/path/to/dir/holding/eukcc-db"
+    "/eukcc-db-dir/"
 
 # likely shouldn't change
 eukcc_db_dir:
