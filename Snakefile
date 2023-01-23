@@ -305,11 +305,6 @@ rule setup_gtdbtk_db:
         """
         mkdir -p {params.gtdbtk_db_dir}
 
-        # storing current working directory to be able to send the log file here
-        working_dir=$(pwd)
-
-        cd {params.gtdbtk_db_dir}
-
         # adding wanted location to this conda env PATH (gtdb-tk looks in the GTDBTK_DATA_PATH variable),
             # so will be set when the conda environment is started from now on
         mkdir -p ${{CONDA_PREFIX}}/etc/conda/activate.d/
@@ -318,8 +313,7 @@ rule setup_gtdbtk_db:
         export GTDBTK_DATA_PATH={params.gtdbtk_db_dir}
 
         # now downloading
-        download-db.sh > ${{working_dir}}/{log} 2>&1
-        cd - > /dev/null
+        download-db.sh {params.gtdbtk_db_dir} > {log} 2>&1
         # placing file so that the workflow knows in the future this is done
         touch {output.gtdbtk_db_trigger}
         """
