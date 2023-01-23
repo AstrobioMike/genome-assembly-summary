@@ -4,9 +4,11 @@ Snakemake workflow for generating and combining genome assembly stats and taxono
 It uses:
 
   - [bit](https://github.com/AstrobioMike/bit#bioinformatics-tools-bit) for generating assembly summary stats
-  - [checkm](https://github.com/Ecogenomics/CheckM#checkm) for estimating quality of bacteria/archaea
+  - [checkm2](https://github.com/chklovski/CheckM2#checkm2) for estimating quality of bacteria/archaea
+  - [GTDB-tk](https://github.com/Ecogenomics/GTDBTk#gtdb-tk) for assigning taxonomy of bacteria/archaea
   - [eukcc](https://github.com/Finn-Lab/EukCC#eukcc) for estimating quality of eukarya
-  - [GTDBtk](https://github.com/Ecogenomics/GTDBTk#gtdb-tk) for assigning taxonomy of bacteria/archaea
   - [CAT](https://github.com/dutilh/CAT#cat-and-bat) with NCBI database for assigning taxonomy of eukarya
 
 Set info in config.yaml file.
+
+The workflow can be retrieved programmatically with [bit](https://github.com/AstrobioMike/bit) using `bit-get-genome-summarize-wf`.
