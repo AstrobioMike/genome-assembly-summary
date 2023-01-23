@@ -9,6 +9,6 @@ It uses:
   - [eukcc](https://github.com/Finn-Lab/EukCC#eukcc) for estimating quality of eukarya
   - [CAT](https://github.com/dutilh/CAT#cat-and-bat) with NCBI database for assigning taxonomy of eukarya
 
-Set info in config.yaml file.
+Set needed in config.yaml file, all required databases should be setup by the workflow if they don't exist already whenever they are first used.
 
 The workflow can be retrieved programmatically with [bit](https://github.com/AstrobioMike/bit) using `bit-get-genome-summarize-wf`.
