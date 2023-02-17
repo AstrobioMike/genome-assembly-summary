@@ -1,14 +1,17 @@
+# this is just a prefix for the final output table
 output_prefix:
     "Output"
 
-# set to True, with no quotes, if genomes are from eukarya, False, with no quotes if bacteria/archaea
+# set to True, with no quotes, if genomes are from eukarya, 
+# set to False, with no quotes if genomes bacteria/archaea
 is_euk:
     False
 
+# path to where the genomes are located
 genomes_dir:
     "../genomes"
 
-# extension the fasta files have (must not be gzipped; include the period preceding, e.g., ".fasta", ".fna", ".fa")
+# extension the fasta files have (must not be gzipped as currently written; include the period preceding, e.g., ".fasta", ".fna", ".fa")
 assembly_extension:
     ".fasta"
 
@@ -40,14 +43,19 @@ keep_all_files:
 #######################################################
 ################# REFERENCE DATABASES #################
 #######################################################
-# The workflow will check the location pointed to above for the below databases, and install them
-# if they are not already there. It looks for the below "TRIGGER" filenames (they 
-# all end with "*_DB_SETUP") in the directory for each database, which it creates when
-# it sets them up initially. If we want to point to DBs that already exist on our setup,
-# we need to add these (empty) files to their respective directories. The
-# workflow just checks the file is there to know it doesn't need to setup the DB.
+# The workflow will check the locations specified below for the corresponding refernence databases, 
+# and install them if they are not already there. It looks for the below "TRIGGER" filenames (they 
+# all end with "*_DB_SETUP") in the directory of each database, which it creates when
+# it sets them up initially. 
+# If we want to point to DBs that already exist on our setup,
+# we need to add these (empty) "TRIGGER" files to their respective directories. The
+# workflow just checks the file is there to know it doesn't need to setup the DB. This might tricky
+# to figure out, and easiest would be to let the workflow do it so all DB versions match the program
+# versions for sure. 
 
 # these should be full paths to the directories that will hold the databases
+# there are some database filenames coded below that are noted as things that
+# we likely shouldn't change, so leave those unless you are sure you want to change them
 
 ### checkm2 ###
 # should change
@@ -58,6 +66,7 @@ CHECKM2_DATA_PATH:
 CHECKM2_DB_FILENAME:
     "uniref100.KO.1.dmnd"
 
+# likely shouldn't change
 CHECKM2_TRIGGER_FILE:
     "CHECKM2_DB_SETUP"
 
@@ -77,7 +86,7 @@ GTDB_TRIGGER_FILE:
 DIR_HOLDING_CAT_DIR:
     "/CAT-ref-dir/"
 
-# likely shouldn't change
+# likely shouldn't change all of the below
 CAT_DIR:
     "CAT_prepare_20210107"
 CAT_DB:
@@ -99,7 +108,7 @@ CAT_TRIGGER_FILE:
 DIR_HOLDING_eukcc_DIR:
     "/eukcc-db-dir/"
 
-# likely shouldn't change
+# likely shouldn't change all below
 eukcc_db_dir:
     "eukcc2_db_ver_1.1"
 eukcc_DL_FILE:
