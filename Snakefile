@@ -1,3 +1,8 @@
+# Maintained by Mike Lee: Mike.Lee@nasa.gov
+# https://github.com/AstrobioMike/genome-assembly-summary
+
+# version 1.0.1
+
 configfile: "config.yaml"
 
 genome_IDs, = glob_wildcards(config["genomes_dir"] + "/{id}" + config["assembly_extension"])
@@ -281,7 +286,7 @@ rule setup_checkm2_db:
 
         # moving from default download location to wanted location
         mkdir -p {params.checkm2_db_dir}
-        mv /home/${{USER}}/databases/CheckM2_database/* {params.checkm2_db_dir}
+        mv ~/databases/CheckM2_database/* {params.checkm2_db_dir}
 
         # placing file so that the workflow knows in the future this is done already
         touch {output.checkm2_db_trigger}
