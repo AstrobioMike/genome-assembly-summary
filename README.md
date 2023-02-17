@@ -1,5 +1,7 @@
 # Genome assembly summary
-A snakemake workflow for generating and combining genome assembly stats and taxonomy info. Inputs are fasta files of genome assemblies (currently only non-compressed).
+A snakemake workflow for generating and combining genome assembly stats, quality estimates, and taxonomy info. Inputs are fasta files of genome assemblies (currently only non-compressed, let me know if adding accepting gzipped as input would be helpful).
+
+## Overview
 
 It uses:
 
@@ -9,7 +11,7 @@ It uses:
   - [eukcc](https://github.com/Finn-Lab/EukCC#eukcc) for estimating quality of eukarya
   - [CAT](https://github.com/dutilh/CAT#cat-and-bat) with the NCBI nr database for assigning taxonomy of eukarya
 
-Before running it, you first need to set some variables in the config.yaml file. All required databases will be setup by the workflow if they don't exist already whenever they are used for the first time.
+Before running it, you first need to set some variables in the config.yaml file (there are notes in there). All required databases will be setup by the workflow if they don't exist already whenever they are used for the first time.
 
 The workflow can be retrieved programmatically with [bit](https://github.com/AstrobioMike/bit) using `bit-get-genome-summarize-wf`.
 
