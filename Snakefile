@@ -226,7 +226,7 @@ if not config["is_euk"]:
             fi
             set -u
 
-            gtdbtk classify_wf -x {params.extension} --genome_dir {params.genomes_dir} --out_dir {output} --cpus {resources.cpus} --pplacer_cpus {params.pplacer_cpus} > {log} 2>&1
+            gtdbtk classify_wf -x {params.extension} --genome_dir {params.genomes_dir} --out_dir {output} --cpus {resources.cpus} --pplacer_cpus {params.pplacer_cpus} --skip_ani_screen > {log} 2>&1
             """
 
 
