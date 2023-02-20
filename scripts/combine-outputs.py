@@ -73,6 +73,11 @@ with open(args.input_tax_tsv, "r") as tax:
 
         tax_list = re.split(".?__", tax_str)[1:8]
 
+        # handling if nothing was at all classified
+        if not tax_list:
+            
+            tax_list = ["Not Assigned"] * 7
+
         curr_dict = dict(zip(iter(ranks), iter(tax_list)))
 
         tax_dict[ID] = curr_dict

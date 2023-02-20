@@ -1,7 +1,7 @@
 # Maintained by Mike Lee: Mike.Lee@nasa.gov
 # https://github.com/AstrobioMike/genome-assembly-summary
 
-# version 1.0.1
+# version 1.0.2
 
 configfile: "config.yaml"
 
