@@ -15,6 +15,22 @@ genomes_dir:
 assembly_extension:
     ".fasta"
 
+## reference database locations
+# these should be full paths to the directories that will hold the databases (more info below)
+CHECKM2_DATA_PATH:
+    "/checkm2-ref-dir/"
+
+GTDB_DATA_PATH:
+    "/GTDB-tk-ref-dir/"
+
+DIR_HOLDING_CAT_DIR:
+    "/dir-holding-CAT-ref-dir/"
+    # actual directory name of CAT DB is below
+
+DIR_HOLDING_eukcc_DIR:
+    "/dir-holding-eukcc-db-dir/"
+    # actual directory name of eukcc db is below
+
 ## number of threads or cpus (depending on how the program labeled them) to use per snakemake job (set with the -j parameter to the snakemake call)
     # passed to eukcc, CAT, checkm2, gtdb-tk
 threads:
@@ -43,25 +59,20 @@ keep_all_files:
 #######################################################
 ################# REFERENCE DATABASES #################
 #######################################################
-# The workflow will check the locations specified below for the corresponding refernence databases, 
+# The workflow will check the locations specified above for the corresponding refernence databases, 
 # and install them if they are not already there. It looks for the below "TRIGGER" filenames (they 
 # all end with "*_DB_SETUP") in the directory of each database, which it creates when
 # it sets them up initially. 
-# If we want to point to DBs that already exist on our setup,
+# If we want to point to DBs that already exist on our setup, that were not prepared by this workflow,
 # we need to add these (empty) "TRIGGER" files to their respective directories. The
 # workflow just checks the file is there to know it doesn't need to setup the DB. This might tricky
 # to figure out, and easiest would be to let the workflow do it so all DB versions match the program
 # versions for sure. 
 
-# these should be full paths to the directories that will hold the databases
 # there are some database filenames coded below that are noted as things that
 # we likely shouldn't change, so leave those unless you are sure you want to change them
 
 ### checkm2 ###
-# should change
-CHECKM2_DATA_PATH:
-    "/checkm2-ref-dir/"
-
 # likely shouldn't change
 CHECKM2_DB_FILENAME:
     "uniref100.KO.1.dmnd"
@@ -70,22 +81,12 @@ CHECKM2_DB_FILENAME:
 CHECKM2_TRIGGER_FILE:
     "CHECKM2_DB_SETUP"
 
-
 ### gtdb-tk ###
-# should change
-GTDB_DATA_PATH:
-    "/GTDB-tk-ref-dir/"
-
 # likely shouldn't change
 GTDB_TRIGGER_FILE:
     "GTDBTK_DB_SETUP"
 
-
 ### CAT ###
-# should change
-DIR_HOLDING_CAT_DIR:
-    "/CAT-ref-dir/"
-
 # likely shouldn't change all of the below
 CAT_DIR:
     "CAT_prepare_20210107"
@@ -102,12 +103,7 @@ CAT_COMPRESSED_NR_FAA:
 CAT_TRIGGER_FILE:
     "CAT_DB_SETUP"
 
-
 ### eukcc ###
-# should change
-DIR_HOLDING_eukcc_DIR:
-    "/eukcc-db-dir/"
-
 # likely shouldn't change all below
 eukcc_db_dir:
     "eukcc2_db_ver_1.1"
