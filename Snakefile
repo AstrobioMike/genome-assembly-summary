@@ -1,7 +1,7 @@
-# Maintained by Mike Lee: Mike.Lee@nasa.gov
+# Developed and maintained by Mike Lee: MikeLee@bmsis.org
 # https://github.com/AstrobioMike/genome-assembly-summary
 
-# version 1.0.2
+# version 1.0.3
 
 configfile: "config.yaml"
 
@@ -65,6 +65,7 @@ if config["is_euk"]:
             eukcc_db_dir = config["DIR_HOLDING_eukcc_DIR"] + "/" + config["eukcc_db_dir"]
         resources:
             cpus = config["threads"]
+            mem_mb = config["eukcc_memory_resources"]
         log:
             config["logs_dir"] + "{genome_ID}-eukcc.log"
         output:
@@ -111,6 +112,9 @@ if config["is_euk"]:
             cat_tax = config["DIR_HOLDING_CAT_DIR"] + "/" + config["CAT_DIR"] + "/" + config["CAT_TAX"],
             num_threads = config["threads"],
             assembly_extension = config["assembly_extension"]
+        resources:
+            cpus = config["threads"]
+            mem_mb = config["CAT_memory_resources"]        
         log:
             config["logs_dir"] + "{genome_ID}-CAT.log"
         output:
@@ -173,7 +177,8 @@ if not config["is_euk"]:
             checkm2_db_dir = config["CHECKM2_DATA_PATH"],
             checkm2_db_filename = config["CHECKM2_DB_FILENAME"]
         resources:
-            cpus = config["threads"]
+            cpus = config["threads"],
+            mem_mb = config["checkm2_memory_resources"]
         output:
             out_dir = directory(config["checkm2_output_dir"]),
             checkm2_results_tab = "checkm2-results.tsv"
@@ -198,7 +203,7 @@ if not config["is_euk"]:
             """
 
 
-    rule gtdb_tk_classify:
+    rule gtdbtk_classify:
         conda:
             "envs/gtdb-tk.yaml"
         input:
@@ -209,7 +214,8 @@ if not config["is_euk"]:
             extension = config["assembly_extension"],
             gtdbtk_db_dir = config["GTDB_DATA_PATH"]
         resources:
-            cpus = config["threads"]
+            cpus = config["threads"],
+            mem_mb = config["gtdbtk_memory_resources"]
         output:
             directory(config["gtdbtk_output_dir"])
         log:

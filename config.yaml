@@ -12,6 +12,7 @@ genomes_dir:
     "../genomes"
 
 # extension the fasta files have (must not be gzipped as currently written; include the period preceding, e.g., ".fasta", ".fna", ".fa")
+    # gzip-compressed not accepted currently
 assembly_extension:
     ".fasta"
 
@@ -55,6 +56,30 @@ gtdbtk_output_dir:
 # means all be deleted upon completion except for the primary output summary table
 keep_all_files:
     "no"
+
+################################################################################################################
+##### Resource specifications that may need to be changed (mostly only necessary if using a job scheduler) #####
+####### Could leave these as-is to start, but they are here to be increased if a job fails due to memory #######
+################################################################################################################
+
+### these are all passed in the "resources" directive of their respective rules in the Snakefile, going to
+    # the "mem_mb" argument (so should be provided in terms of megabytes)
+
+# passed to rule gtdbtk_classify
+gtdbtk_memory_resources:
+    100000
+
+# passed to rule run_checkm2
+checkm2_memory_resources:
+    50000
+
+# passed to the run_CAT rule
+CAT_memory_resources:
+    40000
+
+# passed to the run_eukcc rule
+eukcc_memory_resources:
+    50000
 
 #######################################################
 ################# REFERENCE DATABASES #################
