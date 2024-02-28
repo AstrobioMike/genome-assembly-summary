@@ -19,17 +19,17 @@ assembly_extension:
 ## reference database locations
 # these should be full paths to the directories that will hold the databases (more info below)
 CHECKM2_DATA_PATH:
-    "/checkm2-ref-dir/"
+    "/checkm2-ref-dir"
 
 GTDB_DATA_PATH:
-    "/GTDB-tk-ref-dir/"
+    "/GTDB-tk-ref-dir"
 
 DIR_HOLDING_CAT_DIR:
-    "/dir-holding-CAT-ref-dir/"
+    "/dir-holding-CAT-ref-dir"
     # actual directory name of CAT DB is below
 
 DIR_HOLDING_eukcc_DIR:
-    "/dir-holding-eukcc-db-dir/"
+    "/dir-holding-eukcc-db-dir"
     # actual directory name of eukcc db is below
 
 ## number of threads or cpus (depending on how the program labeled them) to use per snakemake job (set with the -j parameter to the snakemake call)

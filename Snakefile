@@ -64,7 +64,7 @@ if config["is_euk"]:
             output_dir = "{genome_ID}-eukcc-out",
             eukcc_db_dir = config["DIR_HOLDING_eukcc_DIR"] + "/" + config["eukcc_db_dir"]
         resources:
-            cpus = config["threads"]
+            cpus = config["threads"],
             mem_mb = config["eukcc_memory_resources"]
         log:
             config["logs_dir"] + "{genome_ID}-eukcc.log"
@@ -113,7 +113,7 @@ if config["is_euk"]:
             num_threads = config["threads"],
             assembly_extension = config["assembly_extension"]
         resources:
-            cpus = config["threads"]
+            cpus = config["threads"],
             mem_mb = config["CAT_memory_resources"]        
         log:
             config["logs_dir"] + "{genome_ID}-CAT.log"
