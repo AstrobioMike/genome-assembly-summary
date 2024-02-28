@@ -11,7 +11,16 @@ It uses:
   - [eukcc](https://github.com/Finn-Lab/EukCC#eukcc) for estimating quality of eukarya
   - [CAT](https://github.com/dutilh/CAT#cat-and-bat) with the NCBI nr database for assigning taxonomy of eukarya
 
-Before running it, you first need to set some variables in the config.yaml file (there are notes in there). All required databases will be setup by the workflow if they don't exist already whenever they are used for the first time.
+Before running it, you first need to set some variables in the config.yaml file (there are notes in there). It cannot currently run on a mix of input bacteria/archaea genomes and eukaryotic genomes, it can only run on bacteria/archaea by themselves, or eukarya by themselves (as set by a parameter in the config.yaml file).
+
+In the config.yaml file, you mostly just need to point to where the input fasta files are, specify what their extensions are, and run the snakemake workflow as exemplified below. It will summarize the assemblies, estimate quality, and assign taxonomy via the programs listed above, and ultimately produce an output table like this:
+
+```bash
+Assembly        Total contigs  Total length  Ambiguous characters  GC content  Maximum contig length  Minimum contig length  N50        L50  Est. Completeness (%)  Est. Redundancy (%)  Domain    Phylum          Class                Order             Family             Genus           Species
+input_genome_A  1              5,276,633     0                     61.17       5,276,633              5,276,633              5,276,633  1    99.99                  0.96                 Bacteria  Proteobacteria  Gammaproteobacteria  Pseudomonadales   Pseudomonadaceae   Pseudomonas_E   Pseudomonas_E fulva
+input_MAG_B     4              2,702,105     0                     33.15       2,601,030              30,881                 2,601,030  1    90.22                  2.78                 Bacteria  Firmicutes      Bacilli              Staphylococcales  Staphylococcaceae  Staphylococcus  Staphylococcus saprophyticus
+```
+All required databases will be setup by the workflow if they don't exist already whenever they are used for the first time.
 
 The workflow can be retrieved programmatically with [bit](https://github.com/AstrobioMike/bit) using `bit-get-genome-summarize-wf`.
 
